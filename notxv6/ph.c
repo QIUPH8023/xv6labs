@@ -8,6 +8,9 @@
 #define NBUCKET 5
 #define NKEYS 100000
 
+/** 全局变量 */ 
+pthread_mutex_t lks[NBUCKET];
+
 struct entry {
   int key;
   int value;
@@ -46,6 +49,8 @@ void put(int key, int value)
     if (e->key == key)
       break;
   }
+  /** 写操作应上锁 */
+  pthread_mutex_lock(&lks[i]);
   if(e){
     // update the existing key.
     e->value = value;
@@ -53,6 +58,8 @@ void put(int key, int value)
     // the new is new.
     insert(key, value, &table[i], table[i]);
   }
+  /** 写完放锁 */
+  pthread_mutex_unlock(&lks[i]);
 }
 
 static struct entry*
@@ -96,6 +103,9 @@ get_thread(void *xa)
   return NULL;
 }
 
+
+
+/** 在 main 中初始化 locks */
 int
 main(int argc, char *argv[])
 {
@@ -114,6 +124,10 @@ main(int argc, char *argv[])
   for (int i = 0; i < NKEYS; i++) {
     keys[i] = random();
   }
+
+  /** 初始化locks */
+  for(int i=0; i<NBUCKET; i++) 
+    pthread_mutex_init(&lks[i], NULL);
 
   //
   // first the puts
