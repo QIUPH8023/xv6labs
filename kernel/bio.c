@@ -36,7 +36,7 @@ struct {
   // Linked list of all buffers, through prev/next.
   // Sorted by how recently the buffer was used.
   // head.next is most recent, head.prev is least.
-//  struct buf head;    // lab8-2
+  struct buf head;    // lab8-2
 } bcache;
 
 void
@@ -159,17 +159,17 @@ bget(uint dev, uint blockno)
   }
 // lab8-2
 //  // Recycle the least recently used (LRU) unused buffer.
-//  for(b = bcache.head.prev; b != &bcache.head; b = b->prev){
-//    if(b->refcnt == 0) {
-//      b->dev = dev;
-//      b->blockno = blockno;
-//      b->valid = 0;
-//      b->refcnt = 1;
-//      release(&bcache.lock);
-//      acquiresleep(&b->lock);
-//      return b;
-//    }
-//  }
+ for(b = bcache.head.prev; b != &bcache.head; b = b->prev){
+   if(b->refcnt == 0) {
+     b->dev = dev;
+     b->blockno = blockno;
+     b->valid = 0;
+     b->refcnt = 1;
+     release(&bcache.lock);
+     acquiresleep(&b->lock);
+     return b;
+   }
+ }
   panic("bget: no buffers");
 }
 
@@ -247,6 +247,4 @@ bunpin(struct buf *b) {
   b->refcnt--;
   release(&bcache.locks[idx]);
 }
-
-
 
