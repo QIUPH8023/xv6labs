@@ -15,6 +15,9 @@ r_mhartid()
 #define MSTATUS_MPP_U (0L << 11)
 #define MSTATUS_MIE (1L << 3)    // machine-mode interrupt enable.
 
+/** 在PTE中添加COW标记位，其中第8位和第9位是预留位，可用！ */
+#define PTE_COW (1L << 8)
+
 static inline uint64
 r_mstatus()
 {
